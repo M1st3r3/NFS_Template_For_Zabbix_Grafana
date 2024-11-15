@@ -1,0 +1,110 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 3b7362250ad94b26995a976cbdf3b44f
+      name: NFS_TEMPLATE_GROUP
+  templates:
+    - uuid: 898e0a6835954f7290bacdfb0c25b665
+      template: NFS_Template
+      name: NFS_Template
+      groups:
+        - name: NFS_TEMPLATE_GROUP
+      items:
+        - uuid: 4d776b4da59545cda789e59a62a47f1e
+          name: 'NFS Server Availability'
+          key: agent.ping
+          delay: 30s
+          tags:
+            - tag: Availability
+            - tag: NFS
+          triggers:
+            - uuid: e1801a1a514644558afb0ecedf3f1539
+              expression: last(/NFS_Template/agent.ping)=0
+              name: 'NFS Server Unavailable'
+              priority: WARNING
+        - uuid: b49561d495524903a4468b29f830af44
+          name: 'Used Disk Space (%)'
+          key: 'system.run[df -h /srv/nfs/share/ | awk ''NR==2 {print $5}'' | tr -d ''%'']'
+          delay: 30s
+          value_type: FLOAT
+          units: '%'
+          tags:
+            - tag: Disk
+            - tag: NFS
+          triggers:
+            - uuid: 8b531da94b0c4f1dbe53e4faf724bc2c
+              expression: 'last(/NFS_Template/system.run[df -h /srv/nfs/share/ | awk ''NR==2 {print $5}'' | tr -d ''%''])>80'
+              name: 'High Disk Usage on NFS Share'
+              priority: HIGH
+        - uuid: 3e8b132fa64b4655b868d9fd784e8f05
+          name: 'NFS Error count'
+          key: 'system.run[grep -i ''nfs.*error'' /var/log/syslog | /usr/bin/wc -l]'
+          delay: 30s
+          trends: '0'
+          tags:
+            - tag: ERROR
+            - tag: NFS
+          triggers:
+            - uuid: 8c968a8fc9ee44179e123891fc5adcad
+              expression: 'last(/NFS_Template/system.run[grep -i ''nfs.*error'' /var/log/syslog | /usr/bin/wc -l])>40'
+              name: 'Too Many NFS Errors (/var/log/syslog)'
+              priority: INFO
+        - uuid: 3bb5d3977ffe49ab9177e516a18e31f5
+          name: 'Disk Read Rate (sda) [KB/s]'
+          key: 'system.run[iostat -x 1 1 | awk ''$1=="sda" {print $3}'']'
+          delay: 30s
+          value_type: FLOAT
+          trends: '0'
+          units: KB/s
+          tags:
+            - tag: Disk
+            - tag: NFS
+          triggers:
+            - uuid: 5545f991f04f47f5a387d25871fab3d6
+              expression: 'last(/NFS_Template/system.run[iostat -x 1 1 | awk ''$1=="sda" {print $3}''])>280'
+              name: 'High Disk Read Rate'
+              priority: HIGH
+        - uuid: 89ceae88fab34e2d8517a96c0b154b05
+          name: 'NFS Read Latency (ms)'
+          key: 'system.run[iostat -x 1 1 | awk ''$1=="sda" {print $6}'']'
+          delay: 30s
+          value_type: FLOAT
+          units: ms
+          tags:
+            - tag: NFS
+            - tag: 'Read Latency'
+          triggers:
+            - uuid: 5e4ddce20f3b4939b5369707f93b3560
+              expression: 'last(/NFS_Template/system.run[iostat -x 1 1 | awk ''$1=="sda" {print $6}''])>4'
+              name: 'High NFS Read Latency'
+              priority: HIGH
+        - uuid: 939e8de0ec04490a96d721006667363a
+          name: 'Disk Write Rate [KB/s]'
+          key: 'system.run[iostat -x 1 1 | awk ''$1=="sda" {print $9}'']'
+          delay: 30s
+          value_type: FLOAT
+          trends: '0'
+          units: KB/s
+          tags:
+            - tag: DISK
+            - tag: NFS
+          triggers:
+            - uuid: 04b5451a185245e1b8654a8c8048cef2
+              expression: 'last(/NFS_Template/system.run[iostat -x 1 1 | awk ''$1=="sda" {print $9}''])>250'
+              name: 'High Disk Write Rate'
+              priority: HIGH
+        - uuid: 4b8181fe75174a448ee76c473cde070f
+          name: 'NFS Write Latency (ms)'
+          key: 'system.run[iostat -x 1 1 | awk ''$1=="sda" {print $12}'']'
+          delay: 30s
+          value_type: FLOAT
+          trends: '0'
+          units: ms
+          tags:
+            - tag: NFS
+            - tag: 'Write Latency'
+          triggers:
+            - uuid: f171af2af9ac44cd85557a7b771b384c
+              expression: 'last(/NFS_Template/system.run[iostat -x 1 1 | awk ''$1=="sda" {print $12}''])>4'
+              name: 'High NFS Write Latency'
+              priority: HIGH

@@ -1,0 +1,18 @@
+DANS /etc/zabbix/zabbix_agentd.conf
+
+Mettre 
+
+AllowRoot=1
+AllowKey=system.run[*]
+
+
+sudo chmod 644 /var/log/syslog
+
+2  choix nfs error :
+
+sudo grep -i 'nfs.*error' /var/log/syslog | wc -l
+
+grep -i 'nfs.*denied' /var/log/syslog | wc -l
+
+
+
