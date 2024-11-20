@@ -22,6 +22,21 @@ zabbix_export:
               expression: last(/NFS_Template/agent.ping)=0
               name: 'NFS Server Unavailable'
               priority: WARNING
+        - uuid: 3e8b132fa64b4655b868d9fd784e8f05
+          name: 'NFS Error count'
+          key: 'system.run[/etc/zabbix/nfs_error.sh]'
+          delay: 5m
+          value_type: FLOAT
+          trends: '0'
+          units: counts
+          tags:
+            - tag: ERROR
+            - tag: NFS
+          triggers:
+            - uuid: 8c968a8fc9ee44179e123891fc5adcad
+              expression: 'last(/NFS_Template/system.run[/etc/zabbix/nfs_error.sh])>40'
+              name: 'Too Many NFS Errors (/var/log/syslog)'
+              priority: INFO
         - uuid: b49561d495524903a4468b29f830af44
           name: 'Used Disk Space (%)'
           key: 'system.run[df -h /srv/nfs/share/ | awk ''NR==2 {print $5}'' | tr -d ''%'']'
@@ -36,19 +51,6 @@ zabbix_export:
               expression: 'last(/NFS_Template/system.run[df -h /srv/nfs/share/ | awk ''NR==2 {print $5}'' | tr -d ''%''])>80'
               name: 'High Disk Usage on NFS Share'
               priority: HIGH
-        - uuid: 3e8b132fa64b4655b868d9fd784e8f05
-          name: 'NFS Error count'
-          key: 'system.run[grep -i ''nfs.*error'' /var/log/syslog | /usr/bin/wc -l]'
-          delay: 30s
-          trends: '0'
-          tags:
-            - tag: ERROR
-            - tag: NFS
-          triggers:
-            - uuid: 8c968a8fc9ee44179e123891fc5adcad
-              expression: 'last(/NFS_Template/system.run[grep -i ''nfs.*error'' /var/log/syslog | /usr/bin/wc -l])>40'
-              name: 'Too Many NFS Errors (/var/log/syslog)'
-              priority: INFO
         - uuid: 3bb5d3977ffe49ab9177e516a18e31f5
           name: 'Disk Read Rate (sda) [KB/s]'
           key: 'system.run[iostat -x 1 1 | awk ''$1=="sda" {print $3}'']'
