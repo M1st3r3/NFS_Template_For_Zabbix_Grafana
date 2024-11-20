@@ -1,6 +1,7 @@
 #!/bin/bash
 # A mettre dans /etc/zabbix
 # sudo chown zabbix:zabbix /etc/zabbix/nfs_error.sh
+# sudo chmod 644 /var/log/syslog
 
 # Get current timestamp and 5 minutes ago timestamp in seconds
 CURRENT_TIME=$(date +%s)
